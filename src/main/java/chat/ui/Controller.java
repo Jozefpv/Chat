@@ -1,10 +1,11 @@
-package chat;
+package chat.ui;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import chat.Client;
+import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -22,7 +23,7 @@ import javafx.scene.layout.BorderPane;
 
 public class Controller implements Initializable {
 
-	public Cliente jozef;
+	public Client client;
 	public ListProperty<String> lista = new SimpleListProperty<>(FXCollections.observableArrayList());
 	public StringProperty mensaje = new SimpleStringProperty();
 	
@@ -54,9 +55,15 @@ public class Controller implements Initializable {
 		messageList.itemsProperty().bind(lista);
 		mensaje.bindBidirectional(textInput.textProperty());
 		
-		
-		jozef = new Cliente("192.168.1.165", "50555");
-		jozef.conectarAlServidor(getLista(), getMensaje());
+		client = new Client("192.168.1.138", 50555);
+		client.connect();
+		client.send("Profe");
+		client.listen(message -> {
+			System.out.println(message);
+			Platform.runLater(() -> {
+				lista.add(message);
+			});
+		});
 		
 		
 	}
@@ -64,7 +71,7 @@ public class Controller implements Initializable {
 
 	@FXML
 	void onSendAction(ActionEvent event) {
-		jozef.getEscribeCliente().sendMessage(getMensaje());
+		client.send(getMensaje());
 		setMensaje("");
 	}
 
